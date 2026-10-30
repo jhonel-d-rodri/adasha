@@ -34,7 +34,7 @@ class UsuarioController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email',
-            'password' => 'required|string|min:6|confirmed',
+            'password' => 'required|string|min:8|confirmed',
             'role' => 'required|in:admin,usuario',
         ]);
 
@@ -67,7 +67,7 @@ class UsuarioController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email,' . $usuario->id,
             'role' => 'required|in:admin,usuario',
-            'password' => 'nullable|string|min:6|confirmed',
+            'password' => 'nullable|string|min:8|confirmed',
         ]);
 
         $datos = [
@@ -82,9 +82,13 @@ class UsuarioController extends Controller
 
         $usuario->update($datos);
 
+        $mensaje = $request->filled('password')
+            ? 'Usuario actualizado y nueva contraseña asignada correctamente.'
+            : 'Usuario actualizado correctamente.';
+
         return redirect()
             ->route('usuarios.index')
-            ->with('success', 'Usuario actualizado correctamente.');
+            ->with('success', $mensaje);
     }
 
     /**

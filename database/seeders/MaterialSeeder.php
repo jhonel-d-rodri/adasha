@@ -54,6 +54,47 @@ class MaterialSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
+
+            [
+                'nombre' => 'Piedra para cimiento',
+                'unidad' => 'm3',
+                'stock' => 0,
+                'descripcion' => 'Piedra para cimentación.',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nombre' => 'Alambre de amarre',
+                'unidad' => 'kg',
+                'stock' => 0,
+                'descripcion' => 'Alambre para armado.',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nombre' => 'Madera de encofrado',
+                'unidad' => 'm3',
+                'stock' => 0,
+                'descripcion' => 'Madera para encofrado o cubierta liviana.',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nombre' => 'Clavos',
+                'unidad' => 'kg',
+                'stock' => 0,
+                'descripcion' => 'Clavos para encofrado o cubierta.',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nombre' => 'Agua',
+                'unidad' => 'm3',
+                'stock' => 0,
+                'descripcion' => 'Agua para mortero y concreto.',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
         ]);
     }
 }

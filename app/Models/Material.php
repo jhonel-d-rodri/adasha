@@ -12,11 +12,18 @@ class Material extends Model
         'nombre',
         'unidad',
         'stock',
+        'stock_minimo',
+        'precio_unitario',
         'descripcion'
     ];
 
     public function calculos()
     {
         return $this->hasMany(CalculoMaterial::class);
+    }
+
+    public function movimientos()
+    {
+        return $this->hasMany(MovimientoMaterial::class);
     }
 }

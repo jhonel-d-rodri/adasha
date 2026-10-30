@@ -2,15 +2,15 @@
 
 @section('content')
 
-<div class="container-fluid">
+<div class="container-fluid calculations-page">
 
     {{-- Título --}}
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="app-page-header mb-4">
 
-        <h2>
+        <div><span class="app-eyebrow"><i class="bi bi-boxes"></i> Presupuesto orientativo</span><h2 class="page-title mb-1">
             <i class="bi bi-calculator-fill text-primary"></i>
             Cálculo de Materiales
-        </h2>
+        </h2><p class="text-muted mb-0">Resultados generados a partir del plano y la configuración de obra gruesa.</p></div>
 
         <a href="{{ route('dashboard') }}"
            class="btn btn-outline-secondary btn-sm">
@@ -59,9 +59,9 @@
     @endif
 
     {{-- Información --}}
-    <div class="card shadow mb-4">
+    <div class="card calculation-info-card mb-4">
 
-        <div class="card-header bg-primary text-white">
+        <div class="card-header calculation-info-header">
 
             <h5 class="mb-0">
 
@@ -90,9 +90,9 @@
     </div>
 
     {{-- Resultados --}}
-    <div class="card shadow">
+    <div class="card calculations-card">
 
-        <div class="card-header bg-success text-white">
+        <div class="card-header calculations-card-header">
 
             <div class="d-flex justify-content-between align-items-center">
 
@@ -133,7 +133,7 @@
 
                 <div class="table-responsive">
 
-                    <table class="table table-bordered table-hover align-middle">
+                    <table class="table table-bordered table-hover align-middle material-results-table">
 
                         <thead class="table-dark">
 
@@ -178,8 +178,7 @@
                                 </td>
 
                                 <td>
-                                    <span class="badge bg-primary">
-                                        <i class="bi bi-box-seam-fill"></i>
+                                    <span class="material-name">
                                         {{ $calculo->material->nombre ?? 'Sin material' }}
                                     </span>
                                 </td>
@@ -334,3 +333,4 @@ document.addEventListener('DOMContentLoaded', function () {
 @endpush
 
 @endsection
+

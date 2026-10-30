@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="900" viewBox="0 0 1500 900">
+  <style>
+    .title { font: bold 25px Arial, sans-serif; fill: #14213d; }
+    .class { fill: #fff; stroke: #1d4ed8; stroke-width: 2; }
+    .head { fill: #dbeafe; stroke: #1d4ed8; stroke-width: 2; }
+    .name { font: bold 18px Arial, sans-serif; fill: #172554; text-anchor: middle; }
+    .item { font: 14px Arial, sans-serif; fill: #1f2937; }
+    .line { stroke: #475569; stroke-width: 2.2; fill: none; }
+    .label { font: bold 13px Arial, sans-serif; fill: #334155; }
+    .note { font: italic 13px Arial, sans-serif; fill: #475569; }
+  </style>
+
+  <text x="750" y="38" class="title" text-anchor="middle">Diagrama de clases general — Sistema ADASHA</text>
+
+  <!-- User -->
+  <rect x="70" y="115" width="270" height="220" rx="5" class="class"/>
+  <rect x="70" y="115" width="270" height="44" rx="5" class="head"/>
+  <text x="205" y="143" class="name">User</text>
+  <text x="88" y="185" class="item">+ id: bigint</text>
+  <text x="88" y="207" class="item">+ name: string</text>
+  <text x="88" y="229" class="item">+ email: string</text>
+  <text x="88" y="251" class="item">+ password: string</text>
+  <text x="88" y="273" class="item">+ role: string</text>
+  <text x="88" y="295" class="item">+ google_id: string</text>
+  <text x="88" y="317" class="item">+ avatar: string</text>
+
+  <!-- Proyecto -->
+  <rect x="560" y="90" width="320" height="290" rx="5" class="class"/>
+  <rect x="560" y="90" width="320" height="44" rx="5" class="head"/>
+  <text x="720" y="118" class="name">Proyecto</text>
+  <text x="578" y="160" class="item">+ id: bigint</text>
+  <text x="578" y="182" class="item">+ user_id: bigint</text>
+  <text x="578" y="204" class="item">+ nombre: string</text>
+  <text x="578" y="226" class="item">+ cliente: string</text>
+  <text x="578" y="248" class="item">+ ubicacion: string</text>
+  <text x="578" y="270" class="item">+ latitud, longitud: decimal</text>
+  <text x="578" y="292" class="item">+ fecha_inicio, fecha_finalizacion</text>
+  <text x="578" y="314" class="item">+ altura_muro, espesor_muro</text>
+  <text x="578" y="336" class="item">+ largo/ancho/alto_ladrillo</text>
+  <text x="578" y="358" class="item">+ estado: string</text>
+
+  <!-- Plano -->
+  <rect x="1120" y="105" width="310" height="285" rx="5" class="class"/>
+  <rect x="1120" y="105" width="310" height="44" rx="5" class="head"/>
+  <text x="1275" y="133" class="name">Plano</text>
+  <text x="1138" y="175" class="item">+ id: bigint</text>
+  <text x="1138" y="197" class="item">+ proyecto_id: bigint</text>
+  <text x="1138" y="219" class="item">+ nombre: string</text>
+  <text x="1138" y="241" class="item">+ ruta_archivo: string</text>
+  <text x="1138" y="263" class="item">+ tipo_plano: string</text>
+  <text x="1138" y="285" class="item">+ datos_extraidos: json</text>
+  <text x="1138" y="307" class="item">+ longitud_total: decimal</text>
+  <text x="1138" y="329" class="item">+ plantas, tipo_cubierta</text>
+  <text x="1138" y="351" class="item">+ cimentacion, columnas, vigas</text>
+  <text x="1138" y="373" class="item">+ superficie_construida, area_vanos</text>
+
+  <!-- Material -->
+  <rect x="70" y="555" width="280" height="205" rx="5" class="class"/>
+  <rect x="70" y="555" width="280" height="44" rx="5" class="head"/>
+  <text x="210" y="583" class="name">Material</text>
+  <text x="88" y="625" class="item">+ id: bigint</text>
+  <text x="88" y="647" class="item">+ nombre: string</text>
+  <text x="88" y="669" class="item">+ unidad: string</text>
+  <text x="88" y="691" class="item">+ stock: decimal</text>
+  <text x="88" y="713" class="item">+ stock_minimo: decimal</text>
+  <text x="88" y="735" class="item">+ precio_unitario: decimal</text>
+
+  <!-- CalculoMaterial -->
+  <rect x="560" y="525" width="320" height="190" rx="5" class="class"/>
+  <rect x="560" y="525" width="320" height="44" rx="5" class="head"/>
+  <text x="720" y="553" class="name">CalculoMaterial</text>
+  <text x="578" y="595" class="item">+ id: bigint</text>
+  <text x="578" y="617" class="item">+ proyecto_id: bigint</text>
+  <text x="578" y="639" class="item">+ plano_id: bigint</text>
+  <text x="578" y="661" class="item">+ material_id: bigint</text>
+  <text x="578" y="683" class="item">+ cantidad: decimal</text>
+
+  <!-- MovimientoMaterial -->
+  <rect x="1080" y="530" width="350" height="205" rx="5" class="class"/>
+  <rect x="1080" y="530" width="350" height="44" rx="5" class="head"/>
+  <text x="1255" y="558" class="name">MovimientoMaterial</text>
+  <text x="1098" y="600" class="item">+ id: bigint</text>
+  <text x="1098" y="622" class="item">+ material_id: bigint</text>
+  <text x="1098" y="644" class="item">+ user_id: bigint</text>
+  <text x="1098" y="666" class="item">+ tipo: entrada | salida</text>
+  <text x="1098" y="688" class="item">+ cantidad: decimal</text>
+  <text x="1098" y="710" class="item">+ motivo: string</text>
+
+  <!-- Relations -->
+  <path d="M340 225 L560 225" class="line"/>
+  <text x="350" y="215" class="label">1</text><text x="535" y="215" class="label">N</text>
+  <text x="420" y="245" class="note">posee</text>
+
+  <path d="M880 235 L1120 235" class="line"/>
+  <text x="890" y="225" class="label">1</text><text x="1095" y="225" class="label">N</text>
+  <text x="970" y="255" class="note">contiene</text>
+
+  <path d="M720 380 L720 525" class="line"/>
+  <text x="730" y="400" class="label">1</text><text x="730" y="510" class="label">N</text>
+  <text x="740" y="465" class="note">genera</text>
+
+  <path d="M350 655 L560 655" class="line"/>
+  <text x="360" y="645" class="label">1</text><text x="535" y="645" class="label">N</text>
+  <text x="420" y="675" class="note">participa en</text>
+
+  <path d="M880 620 L1080 620" class="line"/>
+  <text x="890" y="610" class="label">1</text><text x="1055" y="610" class="label">N</text>
+  <text x="935" y="640" class="note">registra</text>
+
+  <path d="M280 335 L280 500 L1120 500 L1120 530" class="line"/>
+  <text x="290" y="355" class="label">1</text><text x="1105" y="520" class="label">N</text>
+  <text x="675" y="492" class="note">realiza movimientos</text>
+</svg>

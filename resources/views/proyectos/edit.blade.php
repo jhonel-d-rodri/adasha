@@ -124,41 +124,38 @@
                 </div>
 
 
-                <div class="mb-3">
+                <div class="row">
 
-                    <label class="form-label">
-                        Estado
-                    </label>
+                    <div class="col-md-6 mb-3">
 
-                    <select
-                        name="estado"
-                        class="form-select"
-                        required>
+                        <label class="form-label">
+                            Fecha de inicio
+                        </label>
 
-                        <option value="registrado"
-                            {{ $proyecto->estado == 'registrado' ? 'selected' : '' }}>
-                            Registrado
-                        </option>
+                        <input
+                            type="date"
+                            name="fecha_inicio"
+                            class="form-control"
+                            value="{{ old('fecha_inicio', $proyecto->fecha_inicio) }}"
+                            required>
 
-                        <option value="en_proceso"
-                            {{ $proyecto->estado == 'en_proceso' ? 'selected' : '' }}>
-                            En proceso
-                        </option>
+                    </div>
 
-                        <option value="analizado"
-                            {{ $proyecto->estado == 'analizado' ? 'selected' : '' }}>
-                            Analizado
-                        </option>
+                    <div class="col-md-6 mb-3">
 
-                        <option value="finalizado"
-                            {{ $proyecto->estado == 'finalizado' ? 'selected' : '' }}>
-                            Finalizado
-                        </option>
+                        <label class="form-label">
+                            Fecha de finalización
+                        </label>
 
-                    </select>
+                        <input
+                            type="date"
+                            name="fecha_finalizacion"
+                            class="form-control"
+                            value="{{ old('fecha_finalizacion', $proyecto->fecha_finalizacion) }}">
+
+                    </div>
 
                 </div>
-
 
                 <div class="mb-4">
 
@@ -231,13 +228,18 @@
                             placeholder="Ej.: 0.15"
                             required>
 
+                        <small class="text-muted">
+                            Puede ingresar metros (0.15) o centímetros (15).
+                            Se guardará siempre en metros.
+                        </small>
+
                     </div>
 
                 </div>
 
 
                 <h6 class="mt-3 mb-3">
-                    Dimensiones del Ladrillo Gambote
+                    Dimensiones de ladrillo
                 </h6>
 
 
@@ -255,7 +257,7 @@
                             class="form-control"
                             step="0.001"
                             min="0.001"
-                            value="{{ old('ladrillo_largo', $proyecto->ladrillo_largo) }}"
+                            value="{{ old('ladrillo_largo', $proyecto->largo_ladrillo) }}"
                             placeholder="Ej.: 0.24"
                             required>
 
@@ -265,7 +267,7 @@
                     <div class="col-md-4 mb-3">
 
                         <label class="form-label">
-                            Ancho (m)
+                            Espesor (m)
                         </label>
 
                         <input
@@ -274,7 +276,7 @@
                             class="form-control"
                             step="0.001"
                             min="0.001"
-                            value="{{ old('ladrillo_ancho', $proyecto->ladrillo_ancho) }}"
+                            value="{{ old('ladrillo_ancho', $proyecto->ancho_ladrillo) }}"
                             placeholder="Ej.: 0.12"
                             required>
 
@@ -293,7 +295,7 @@
                             class="form-control"
                             step="0.001"
                             min="0.001"
-                            value="{{ old('ladrillo_alto', $proyecto->ladrillo_alto) }}"
+                            value="{{ old('ladrillo_alto', $proyecto->alto_ladrillo) }}"
                             placeholder="Ej.: 0.09"
                             required>
 

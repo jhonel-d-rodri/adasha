@@ -12,19 +12,23 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet"
-href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}?v={{ filemtime(public_path('css/dashboard.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/pages.css') }}">
+
+    @stack('styles')
+
+    <link rel="stylesheet" href="{{ asset('css/interface.css') }}?v={{ filemtime(public_path('css/interface.css')) }}">
 
 </head>
 
-<body>
+<body class="app-shell">
 
 <div class="wrapper">
 
     @include('partials.sidebar')
+    <button class="sidebar-backdrop" type="button" aria-label="Cerrar menú" tabindex="-1" hidden></button>
 
     <main class="content">
 
@@ -39,6 +43,29 @@ href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.m
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+const sidebar = document.querySelector('.sidebar');
+const menuToggle = document.getElementById('menu-toggle');
+const backdrop = document.querySelector('.sidebar-backdrop');
+function setMenuOpen(open) {
+    sidebar?.classList.toggle('open', open);
+    menuToggle?.setAttribute('aria-expanded', String(open));
+    if (backdrop) backdrop.hidden = !open;
+    document.body.classList.toggle('menu-open', open);
+}
+menuToggle?.addEventListener('click', () => setMenuOpen(!sidebar?.classList.contains('open')));
+backdrop?.addEventListener('click', () => { setMenuOpen(false); menuToggle?.focus(); });
+document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && sidebar?.classList.contains('open')) {
+        setMenuOpen(false);
+        menuToggle?.focus();
+    }
+});
+window.matchMedia('(min-width: 992px)').addEventListener('change', event => {
+    if (event.matches) setMenuOpen(false);
+});
+</script>
 
 @stack('scripts')
 

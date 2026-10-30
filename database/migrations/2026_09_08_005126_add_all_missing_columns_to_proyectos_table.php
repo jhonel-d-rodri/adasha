@@ -19,8 +19,11 @@ return new class extends Migration
             if (!Schema::hasColumn('proyectos', 'fecha_inicio')) {
                 $table->date('fecha_inicio')->nullable()->after('ubicacion');
             }
+            if (!Schema::hasColumn('proyectos', 'fecha_finalizacion')) {
+                $table->date('fecha_finalizacion')->nullable()->after('fecha_inicio');
+            }
             if (!Schema::hasColumn('proyectos', 'estado')) {
-                $table->string('estado')->default('Activo')->after('fecha_inicio');
+                $table->string('estado')->default('Activo')->after('fecha_finalizacion');
             }
             if (!Schema::hasColumn('proyectos', 'descripcion')) {
                 $table->text('descripcion')->nullable()->after('estado');

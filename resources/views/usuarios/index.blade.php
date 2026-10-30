@@ -2,17 +2,18 @@
 
 @section('content')
 
-<div class="container-fluid py-4">
+<div class="container-fluid users-page">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="app-page-header d-flex justify-content-between align-items-center mb-4">
 
         <div>
-            <h2 class="fw-bold">
+            <span class="app-eyebrow"><i class="bi bi-shield-check"></i> Administración</span>
+            <h2 class="page-title mb-1">
                 <i class="bi bi-people-fill"></i>
                 Gestión de Usuarios
             </h2>
 
-            <p class="text-muted">
+            <p class="text-muted mb-0">
                 Administración de usuarios y administradores del sistema
             </p>
         </div>
@@ -103,7 +104,7 @@
 
                                     @if($usuario->role === 'admin')
 
-                                        <span class="badge bg-danger">
+                                        <span class="badge bg-primary">
                                             <i class="bi bi-shield-fill-check"></i>
                                             Administrador
                                         </span>

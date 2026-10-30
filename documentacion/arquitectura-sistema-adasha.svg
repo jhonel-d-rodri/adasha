@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="920" viewBox="0 0 1600 920">
+  <style>
+    .title{font:bold 27px Arial,sans-serif;fill:#14213d}.subtitle{font:15px Arial,sans-serif;fill:#475569}.box{stroke-width:2;rx:12}.h{font:bold 19px Arial,sans-serif;fill:#fff;text-anchor:middle}.t{font:15px Arial,sans-serif;fill:#1e293b;text-anchor:middle}.s{font:13px Arial,sans-serif;fill:#334155;text-anchor:middle}.line{stroke:#475569;stroke-width:2.5;fill:none;marker-end:url(#arrow)}.dline{stroke:#64748b;stroke-width:2;stroke-dasharray:7 6;fill:none;marker-end:url(#arrow)}.tag{font:bold 13px Arial,sans-serif;fill:#334155;text-anchor:middle}
+  </style>
+  <defs><marker id="arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#475569"/></marker></defs>
+  <text x="800" y="42" class="title" text-anchor="middle">Arquitectura general del Sistema Web ADASHA</text>
+  <text x="800" y="68" class="subtitle" text-anchor="middle">Cálculo automatizado de materiales a partir de planos arquitectónicos</text>
+
+  <!-- User -->
+  <rect x="75" y="135" width="210" height="100" class="box" fill="#e0f2fe" stroke="#0284c7"/>
+  <text x="180" y="176" class="t" style="font-weight:bold">Administrador / Usuario</text>
+  <text x="180" y="201" class="s">Navegador web</text>
+
+  <!-- Presentation -->
+  <rect x="440" y="115" width="340" height="145" class="box" fill="#dbeafe" stroke="#2563eb"/>
+  <rect x="440" y="115" width="340" height="42" rx="12" fill="#2563eb"/>
+  <text x="610" y="142" class="h">Capa de presentación</text>
+  <text x="610" y="185" class="t">Vistas Blade + Bootstrap + CSS</text>
+  <text x="610" y="210" class="t">JavaScript, formularios y mapas</text>
+  <text x="610" y="235" class="s">Login · Dashboard · Proyectos · Reportes</text>
+
+  <!-- Routes middleware -->
+  <rect x="975" y="115" width="320" height="145" class="box" fill="#ede9fe" stroke="#7c3aed"/>
+  <rect x="975" y="115" width="320" height="42" rx="12" fill="#7c3aed"/>
+  <text x="1135" y="142" class="h">Rutas y seguridad</text>
+  <text x="1135" y="185" class="t">Laravel Routes</text>
+  <text x="1135" y="210" class="t">Auth + Role Middleware</text>
+  <text x="1135" y="235" class="s">Autorización por rol y propietario</text>
+
+  <!-- Controllers -->
+  <rect x="440" y="385" width="855" height="170" class="box" fill="#dcfce7" stroke="#16a34a"/>
+  <rect x="440" y="385" width="855" height="42" rx="12" fill="#16a34a"/>
+  <text x="867" y="412" class="h">Capa de lógica de negocio: controladores Laravel</text>
+  <text x="570" y="465" class="t">ProyectoController</text><text x="570" y="492" class="s">Proyectos, clientes, ubicación</text>
+  <text x="760" y="465" class="t">PlanoController</text><text x="760" y="492" class="s">Carga y análisis de planos</text>
+  <text x="980" y="465" class="t">CalculoMaterialController</text><text x="980" y="492" class="s">Estimación de obra gruesa</text>
+  <text x="1175" y="465" class="t">Reporte / Material / Usuario</text><text x="1175" y="492" class="s">PDF, inventario y cuentas</text>
+
+  <!-- Models -->
+  <rect x="440" y="675" width="430" height="150" class="box" fill="#fef3c7" stroke="#d97706"/>
+  <rect x="440" y="675" width="430" height="42" rx="12" fill="#d97706"/>
+  <text x="655" y="702" class="h">Capa de datos: Eloquent ORM</text>
+  <text x="655" y="746" class="t">User · Proyecto · Plano · Material</text>
+  <text x="655" y="772" class="t">CalculoMaterial · MovimientoMaterial</text>
+  <text x="655" y="798" class="s">Modelos, relaciones y migraciones</text>
+
+  <!-- Database -->
+  <rect x="1040" y="675" width="255" height="150" class="box" fill="#fee2e2" stroke="#dc2626"/>
+  <rect x="1040" y="675" width="255" height="42" rx="12" fill="#dc2626"/>
+  <text x="1167" y="702" class="h">MySQL</text>
+  <text x="1167" y="746" class="t">Base de datos ADASHA</text>
+  <text x="1167" y="773" class="s">Usuarios, proyectos, planos,</text>
+  <text x="1167" y="794" class="s">cálculos e inventario</text>
+
+  <!-- external services -->
+  <rect x="70" y="385" width="240" height="90" class="box" fill="#fce7f3" stroke="#db2777"/>
+  <text x="190" y="421" class="t" style="font-weight:bold">Google OAuth</text><text x="190" y="447" class="s">Inicio de sesión social</text>
+  <rect x="70" y="505" width="240" height="90" class="box" fill="#fce7f3" stroke="#db2777"/>
+  <text x="190" y="541" class="t" style="font-weight:bold">Leaflet + Nominatim</text><text x="190" y="567" class="s">Mapa y geolocalización</text>
+  <rect x="70" y="625" width="240" height="90" class="box" fill="#fce7f3" stroke="#db2777"/>
+  <text x="190" y="661" class="t" style="font-weight:bold">Python + OpenCV</text><text x="190" y="687" class="s">Análisis de planos</text>
+  <rect x="70" y="745" width="240" height="90" class="box" fill="#fce7f3" stroke="#db2777"/>
+  <text x="190" y="781" class="t" style="font-weight:bold">DomPDF</text><text x="190" y="807" class="s">Reporte descargable PDF</text>
+
+  <!-- connections -->
+  <path d="M285 185 L440 185" class="line"/><text x="360" y="170" class="tag">HTTP</text>
+  <path d="M780 185 L975 185" class="line"/><text x="875" y="170" class="tag">Solicitud</text>
+  <path d="M1135 260 L1135 385" class="line"/><text x="1154" y="330" class="tag">Validación</text>
+  <path d="M655 555 L655 675" class="line"/><text x="675" y="625" class="tag">Consultas</text>
+  <path d="M870 750 L1040 750" class="line"/><text x="955" y="735" class="tag">SQL</text>
+  <path d="M310 430 L440 430" class="dline"/><path d="M310 550 L440 480" class="dline"/><path d="M310 670 L440 520" class="dline"/><path d="M310 790 L440 535" class="dline"/>
+  <text x="1130" y="875" class="subtitle" text-anchor="middle">Figura: Arquitectura por capas e integración de servicios externos del sistema ADASHA.</text>
+</svg>

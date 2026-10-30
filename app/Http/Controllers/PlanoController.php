@@ -49,6 +49,20 @@ class PlanoController extends Controller
     /**
      * Mostrar todos los planos registrados
      */
+    public function archivo(Plano $plano, Request $request)
+    {
+        $this->verificarAcceso($plano);
+        $ruta = $plano->ruta_archivo;
+        if ($request->boolean('analizado')) {
+            $ruta = pathinfo($ruta, PATHINFO_DIRNAME) . '/' . pathinfo($ruta, PATHINFO_FILENAME) . '_analizado.png';
+        }
+        abort_unless($ruta && Storage::disk('planos')->exists($ruta), 404);
+        return Storage::disk('planos')->response($ruta, null, [
+            'Cache-Control' => 'private, no-store',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
+    }
+
     public function index()
     {
         $usuario = auth()->user();
@@ -109,7 +123,7 @@ class PlanoController extends Controller
         $request->validate([
             'proyecto_id' => 'required|exists:proyectos,id',
             'nombre' => 'required|string|max:255',
-            'archivo' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'archivo' => 'required|file|mimes:jpg,jpeg,png|max:5120',
         ]);
 
         /*
@@ -154,7 +168,7 @@ class PlanoController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $nombreArchivo = time()
+        $nombreArchivo = \Illuminate\Support\Str::uuid()->toString()
             . '_'
             . $archivo->getClientOriginalName();
 
@@ -167,7 +181,7 @@ class PlanoController extends Controller
         $ruta = $archivo->storeAs(
             'planos',
             $nombreArchivo,
-            'public'
+            'planos'
         );
 
         /*
@@ -215,6 +229,9 @@ class PlanoController extends Controller
         */
 
         $this->verificarAcceso($plano);
+        if (!$plano->esImagen()) {
+            return back()->with('error', 'Para analizar un plano, utilice una imagen JPG o PNG.');
+        }
 
         /*
         |--------------------------------------------------------------------------
@@ -224,7 +241,7 @@ class PlanoController extends Controller
 
         if (
             !$plano->ruta_archivo ||
-            !Storage::disk('public')->exists(
+            !Storage::disk('planos')->exists(
                 $plano->ruta_archivo
             )
         ) {
@@ -242,9 +259,17 @@ class PlanoController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $ruta = storage_path(
-            'app/public/' . $plano->ruta_archivo
-        );
+        $ruta = Storage::disk('planos')->path($plano->ruta_archivo);
+
+        if (!is_file($ruta) || !is_readable($ruta)) {
+            return redirect()
+                ->route('planos.index')
+                ->with(
+                    'error',
+                    'El archivo del plano no existe o no se puede leer: '
+                    . $plano->nombre_archivo
+                );
+        }
 
         /*
         |--------------------------------------------------------------------------
@@ -299,12 +324,18 @@ class PlanoController extends Controller
         */
 
         if (!$process->isSuccessful()) {
+            $detalle = trim($process->getErrorOutput());
+
+            if ($detalle === '') {
+                $detalle = trim($process->getOutput());
+            }
+
             return redirect()
                 ->route('planos.index')
                 ->with(
                     'error',
                     'Error al ejecutar Python: '
-                    . $process->getErrorOutput()
+                    . ($detalle ?: 'el proceso no devolvió detalles.')
                 );
         }
 
@@ -369,42 +400,13 @@ class PlanoController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Obtener longitud detectada
-        |--------------------------------------------------------------------------
-        */
-
-        $longitudTotal = floatval(
-            $resultado['longitud_total'] ?? 0
-        );
-
-        /*
-        |--------------------------------------------------------------------------
-        | Verificar longitud
-        |--------------------------------------------------------------------------
-        */
-
-        if ($longitudTotal <= 0) {
-            return redirect()
-                ->route('planos.index')
-                ->with(
-                    'error',
-                    'No se pudo detectar una longitud válida en el plano.'
-                );
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Guardar resultado
+        | Guardar análisis visual
         |--------------------------------------------------------------------------
         */
 
         $plano->update([
-            'longitud_total' => $longitudTotal,
             'procesado' => true,
-            'datos_extraidos' => json_encode(
-                $resultado,
-                JSON_UNESCAPED_UNICODE
-            ),
+            'datos_extraidos' => json_encode($resultado, JSON_UNESCAPED_UNICODE),
         ]);
 
         /*
@@ -432,76 +434,6 @@ class PlanoController extends Controller
 
 
     /**
-     * Calcular materiales del plano analizado
-     */
-    public function calcularMateriales(Plano $plano)
-    {
-        /*
-        |--------------------------------------------------------------------------
-        | Verificar acceso
-        |--------------------------------------------------------------------------
-        */
-
-        $this->verificarAcceso($plano);
-
-        /*
-        |--------------------------------------------------------------------------
-        | Actualizar información
-        |--------------------------------------------------------------------------
-        */
-
-        $plano->refresh();
-
-        $plano->load('proyecto');
-
-        /*
-        |--------------------------------------------------------------------------
-        | Verificar análisis
-        |--------------------------------------------------------------------------
-        */
-
-        if (
-            !$plano->longitud_total ||
-            $plano->longitud_total <= 0
-        ) {
-            return redirect()
-                ->route('planos.index')
-                ->with(
-                    'error',
-                    'Primero debe analizar este plano antes de calcular los materiales.'
-                );
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Verificar proyecto
-        |--------------------------------------------------------------------------
-        */
-
-        if (!$plano->proyecto) {
-            return redirect()
-                ->route('planos.index')
-                ->with(
-                    'error',
-                    'El plano no está asociado a ningún proyecto.'
-                );
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Ejecutar cálculo
-        |--------------------------------------------------------------------------
-        */
-
-        $controlador = app(
-            \App\Http\Controllers\CalculoMaterialController::class
-        );
-
-        return $controlador->calcular($plano);
-    }
-
-
-    /**
      * Eliminar plano
      */
     public function destroy(Plano $plano)
@@ -522,11 +454,11 @@ class PlanoController extends Controller
 
         if (
             $plano->ruta_archivo &&
-            Storage::disk('public')->exists(
+            Storage::disk('planos')->exists(
                 $plano->ruta_archivo
             )
         ) {
-            Storage::disk('public')->delete(
+            Storage::disk('planos')->delete(
                 $plano->ruta_archivo
             );
         }
@@ -539,18 +471,14 @@ class PlanoController extends Controller
 
         if ($plano->ruta_archivo) {
 
-            $analizado = str_replace(
-                '.',
-                '_analizado.',
-                $plano->ruta_archivo
-            );
+            $analizado = pathinfo($plano->ruta_archivo, PATHINFO_DIRNAME) . '/' . pathinfo($plano->ruta_archivo, PATHINFO_FILENAME) . '_analizado.png';
 
             if (
-                Storage::disk('public')->exists(
+                Storage::disk('planos')->exists(
                     $analizado
                 )
             ) {
-                Storage::disk('public')->delete(
+                Storage::disk('planos')->delete(
                     $analizado
                 );
             }

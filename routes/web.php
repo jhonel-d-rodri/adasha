@@ -12,6 +12,7 @@ use App\Http\Controllers\CalculoMaterialController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Auth\PasswordResetController;
 
 
 /*
@@ -38,6 +39,13 @@ Route::get('/login', function () {
     return view('login');
 })->name('login');
 
+Route::middleware('guest')->group(function () {
+    Route::get('/olvide-contrasena', [PasswordResetController::class, 'create'])->name('password.request');
+    Route::post('/olvide-contrasena', [PasswordResetController::class, 'send'])->name('password.email');
+    Route::get('/restablecer-contrasena/{token}', [PasswordResetController::class, 'edit'])->name('password.reset');
+    Route::post('/restablecer-contrasena', [PasswordResetController::class, 'update'])->name('password.update');
+});
+
 
 // Procesar login tradicional
 Route::post('/login', function (Request $request) {
@@ -63,7 +71,7 @@ Route::post('/login', function (Request $request) {
             'El correo electrónico o la contraseña son incorrectos.'
         );
 
-})->name('login.process');
+})->middleware('throttle:login')->name('login.process');
 
 
 /*
@@ -119,6 +127,13 @@ Route::middleware('auth')->group(function () {
     Route::resource('proyectos', ProyectoController::class)
         ->middleware('role:admin,usuario');
 
+    Route::get(
+        '/historial-clientes',
+        [ProyectoController::class, 'historialClientes']
+    )
+    ->middleware('role:admin,usuario')
+    ->name('proyectos.historial');
+
 
     /*
     |--------------------------------------------------------------------------
@@ -144,7 +159,11 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     */
 
+    Route::get('/planos/{plano}/archivo', [PlanoController::class, 'archivo'])
+        ->middleware('role:admin,usuario')->name('planos.archivo');
+
     Route::resource('planos', PlanoController::class)
+        ->only(['index', 'store', 'destroy'])
         ->middleware('role:admin,usuario');
 
 
@@ -174,7 +193,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get(
         '/planos/{plano}/calcular-materiales',
-        [PlanoController::class, 'calcularMateriales']
+        [CalculoMaterialController::class, 'configurar']
     )
     ->middleware('role:admin,usuario')
     ->name('planos.calcular-materiales');
@@ -189,7 +208,12 @@ Route::middleware('auth')->group(function () {
     */
 
     Route::resource('materials', MaterialController::class)
+        ->only(['index', 'store', 'destroy'])
         ->middleware('role:admin');
+
+    Route::post('/materials/{material}/movimientos', [MaterialController::class, 'movimiento'])
+        ->middleware('role:admin')
+        ->name('materials.movimientos.store');
 
 
     /*
@@ -217,7 +241,7 @@ Route::middleware('auth')->group(function () {
 
 
     Route::post(
-        '/calculos/calcular',
+        '/calculos/{plano}/calcular',
         [CalculoMaterialController::class, 'calcular']
     )
     ->middleware('role:admin,usuario')
@@ -289,6 +313,7 @@ Route::middleware('auth')->group(function () {
     */
 
     Route::resource('usuarios', UsuarioController::class)
+        ->except(['show'])
         ->middleware('role:admin');
 
 

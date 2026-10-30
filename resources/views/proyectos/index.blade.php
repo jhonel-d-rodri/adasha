@@ -9,7 +9,7 @@
 <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-p4NxAoJBhIINfQ3fW1q7s9dQJ9b7d8G8m5x5V6d0n7M="
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
     crossorigin=""
 >
 
@@ -17,37 +17,69 @@
 <style>
     #mapaProyecto {
     width: 100%;
-    height: 350px;
-    border-radius: 10px;
+    height: 520px;
+    border-radius: 12px;
     border: 1px solid #dee2e6;
     z-index: 1;
     overflow: hidden;
 }
 
+    .geolocalizacion-panel {
+        min-height: 620px;
+    }
+
+    .geolocalizacion-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
 /* Control de navegación */
 .control-navegacion {
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-    padding: 5px;
+    position: relative;
+    z-index: 1000 !important;
+    pointer-events: auto !important;
+    background: #ffffff;
+    border: 2px solid #0d6efd;
+    border-radius: 10px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.35);
+    padding: 6px;
+}
+
+/* Mantiene los controles personalizados separados del borde inferior. */
+.leaflet-bottom.leaflet-right .control-navegacion {
+    margin: 0 12px 12px 0;
 }
 
 .control-navegacion button {
-    width: 36px;
-    height: 36px;
-    border: 1px solid #ddd;
-    background: white;
+    width: 42px;
+    height: 42px;
+    border: 1px solid #b8c7db;
+    background: #f8fbff;
+    color: #0d6efd;
     cursor: pointer;
-    font-size: 18px;
+    font-size: 21px;
     font-weight: bold;
     display: block;
     margin: 2px;
     border-radius: 5px;
+    pointer-events: auto !important;
 }
 
 .control-navegacion button:hover {
     background: #0d6efd;
     color: white;
+}
+
+.control-navegacion button:focus-visible {
+    outline: 3px solid rgba(13, 110, 253, 0.35);
+    outline-offset: 1px;
+}
+
+#mapaProyecto .leaflet-control-container,
+#mapaProyecto .leaflet-bottom,
+#mapaProyecto .leaflet-right {
+    pointer-events: auto !important;
 }
 
 .control-navegacion .fila {
@@ -67,18 +99,18 @@
 </style>
 
 
-<div class="container-fluid">
+<div class="container-fluid projects-page">
 
     {{-- ========================================================= --}}
     {{-- ENCABEZADO --}}
     {{-- ========================================================= --}}
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="app-page-header mb-4">
 
-        <h2>
+        <div><span class="app-eyebrow"><i class="bi bi-building"></i> Administración de obra</span><h2 class="page-title mb-1">
             <i class="bi bi-folder-fill text-primary"></i>
             Gestión de Proyectos
-        </h2>
+        </h2><p class="text-muted mb-0">Organiza proyectos, clientes, ubicación y planos asociados.</p></div>
 
         <button
             class="btn btn-primary"
@@ -162,9 +194,9 @@
     {{-- LISTA DE PROYECTOS --}}
     {{-- ========================================================= --}}
 
-    <div class="card shadow">
+    <div class="card projects-card">
 
-        <div class="card-header bg-primary text-white">
+        <div class="card-header projects-card-header">
 
             <h5 class="mb-0">
 
@@ -181,7 +213,7 @@
 
             <div class="table-responsive">
 
-                <table class="table table-bordered table-hover align-middle">
+                <table class="table table-hover align-middle projects-table">
 
                     <thead class="table-dark">
 
@@ -195,7 +227,9 @@
 
                             <th>Ubicación</th>
 
-                            <th>Fecha</th>
+                            <th>Inicio</th>
+
+                            <th>Fin</th>
 
                             <th>Estado</th>
 
@@ -246,34 +280,38 @@
                             </td>
 
                             <td>
-                                {{ $proyecto->fecha_inicio }}
+                                {{ $proyecto->fecha_inicio ?? '—' }}
+                            </td>
+
+                            <td>
+                                {{ $proyecto->fecha_finalizacion ?? '—' }}
                             </td>
 
 
                             <td>
 
-                                @if($proyecto->estado == 'registrado')
+                                @if($proyecto->estado_actual == 'registrado')
 
                                     <span class="badge bg-success">
-                                        Activo
+                                        Comienzo
                                     </span>
 
-                                @elseif($proyecto->estado == 'en_proceso')
+                                @elseif($proyecto->estado_actual == 'en_proceso')
 
                                     <span class="badge bg-warning text-dark">
                                         En proceso
                                     </span>
 
-                                @elseif($proyecto->estado == 'finalizado')
+                                @elseif($proyecto->estado_actual == 'finalizado')
 
                                     <span class="badge bg-danger">
-                                        Finalizado
+                                        Finalizó
                                     </span>
 
                                 @else
 
                                     <span class="badge bg-secondary">
-                                        {{ $proyecto->estado }}
+                                        {{ $proyecto->estado_actual }}
                                     </span>
 
                                 @endif
@@ -559,51 +597,24 @@ html {
 
                     </div>
 
-
-                    {{-- ================================================= --}}
-                    {{-- ESTADO Y DESCRIPCIÓN LADO A LADO --}}
-                    {{-- ================================================= --}}
-
                     <div class="row">
-
-                        {{-- ESTADO --}}
 
                         <div class="col-md-6 mb-3">
 
                             <label class="form-label">
-                                Estado
+                                Fecha de finalización
                             </label>
 
-                            <select
-                                name="estado"
-                                class="form-select"
-                                required>
+                            <input
+                                type="date"
+                                name="fecha_finalizacion"
+                                class="form-control"
+                                value="{{ old('fecha_finalizacion') }}"
+                                placeholder="Opcional">
 
-                                <option
-                                    value="Activo"
-                                    {{ old('estado', 'Activo') == 'Activo' ? 'selected' : '' }}>
-
-                                    Activo
-
-                                </option>
-
-                                <option
-                                    value="En_proceso"
-                                    {{ old('estado') == 'En_proceso' ? 'selected' : '' }}>
-
-                                    En proceso
-
-                                </option>
-
-                                <option
-                                    value="Finalizado"
-                                    {{ old('estado') == 'Finalizado' ? 'selected' : '' }}>
-
-                                    Finalizado
-
-                                </option>
-
-                            </select>
+                            <small class="text-muted">
+                                Si se indica, el sistema cambiará automáticamente a Finalizó cuando llegue esa fecha.
+                            </small>
 
                         </div>
 
@@ -628,6 +639,24 @@ html {
 
 
                     {{-- ================================================= --}}
+                    {{-- ESTADO Y DESCRIPCIÓN LADO A LADO --}}
+                    {{-- ================================================= --}}
+
+                    <div class="row">
+
+                        <div class="col-12 mb-3">
+
+                            <div class="alert alert-light border">
+                                <i class="bi bi-info-circle"></i>
+                                El estado se calcula automáticamente: inicia como Comienzo, pasa a En proceso al llegar a la mitad del tiempo estimado y cambia a Finalizó cuando llegue la fecha de cierre.
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    {{-- ================================================= --}}
                     {{-- GEOLOCALIZACIÓN --}}
                     {{-- ================================================= --}}
 
@@ -642,22 +671,25 @@ html {
                     </h6>
 
 
-                    <div class="alert alert-info">
+                    <div class="geolocalizacion-panel">
 
-                        <i class="bi bi-info-circle"></i>
+                        <div class="alert alert-info">
 
-                        Escriba la dirección del proyecto y presione
-                        <strong>Buscar ubicación</strong>.
+                            <i class="bi bi-info-circle"></i>
 
-                        El sistema buscará automáticamente las coordenadas
-                        mediante el servicio de geocodificación.
+                            Escriba la dirección del proyecto y presione
+                            <strong>Buscar ubicación</strong>.
 
-                    </div>
+                            El sistema buscará automáticamente las coordenadas
+                            mediante el servicio de geocodificación.
 
+                        </div>
 
-                    {{-- BOTÓN BUSCAR --}}
+                        <div class="geolocalizacion-wrapper">
 
-                    <div class="row">
+                            {{-- BOTÓN BUSCAR --}}
+
+                            <div class="row">
 
                         <div class="col-md-9 mb-3">
 
@@ -692,72 +724,76 @@ html {
                     </div>
 
 
-                    {{-- COORDENADAS --}}
+                            {{-- COORDENADAS --}}
 
-                    <div class="row ubicacion-coordenadas mb-3">
+                            <div class="row ubicacion-coordenadas mb-3">
 
-                        <div class="col-md-6">
+                                <div class="col-md-6">
 
-                            <label class="form-label">
-                                Latitud
-                            </label>
+                                    <label class="form-label">
+                                        Latitud
+                                    </label>
 
-                            <input
-                                type="text"
-                                name="latitud"
-                                id="latitud"
-                                class="form-control"
-                                value="{{ old('latitud') }}"
-                                readonly
-                                placeholder="Se obtiene automáticamente">
+                                    <input
+                                        type="text"
+                                        name="latitud"
+                                        id="latitud"
+                                        class="form-control"
+                                        value="{{ old('latitud') }}"
+                                        readonly
+                                        placeholder="Se obtiene automáticamente">
+
+                                </div>
+
+
+                                <div class="col-md-6">
+
+                                    <label class="form-label">
+                                        Longitud
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        name="longitud"
+                                        id="longitud"
+                                        class="form-control"
+                                        value="{{ old('longitud') }}"
+                                        readonly
+                                        placeholder="Se obtiene automáticamente">
+
+                                </div>
+
+                            </div>
+
+
+                            {{-- MAPA --}}
+
+                            <div class="mb-4">
+
+                                <label class="form-label fw-bold">
+
+                                    <i class="bi bi-map"></i>
+
+                                    Mapa de ubicación
+
+                                </label>
+
+
+                                <div id="mapaProyecto"></div>
+
+
+                                <small class="text-muted d-block mt-2">
+
+                                    <i class="bi bi-info-circle"></i>
+
+                                    Después de buscar la dirección, el marcador
+                                    mostrará la ubicación encontrada.
+
+                                </small>
+
+                            </div>
 
                         </div>
-
-
-                        <div class="col-md-6">
-
-                            <label class="form-label">
-                                Longitud
-                            </label>
-
-                            <input
-                                type="text"
-                                name="longitud"
-                                id="longitud"
-                                class="form-control"
-                                value="{{ old('longitud') }}"
-                                readonly
-                                placeholder="Se obtiene automáticamente">
-
-                        </div>
-
-                    </div>
-
-
-                    {{-- MAPA --}}
-
-                    <div class="mb-4">
-
-                        <label class="form-label fw-bold">
-
-                            <i class="bi bi-map"></i>
-
-                            Mapa de ubicación
-
-                        </label>
-
-
-                        <div id="mapaProyecto"></div>
-
-
-                        <small class="text-muted d-block mt-2">
-
-                            <i class="bi bi-info-circle"></i>
-
-                            Después de buscar la dirección, el marcador
-                            mostrará la ubicación encontrada.
-
-                        </small>
 
                     </div>
 
@@ -830,7 +866,7 @@ html {
                                 name="archivo"
                                 id="archivoPlano"
                                 class="form-control"
-                                accept=".jpg,.jpeg,.png,.pdf"
+                                accept=".jpg,.jpeg,.png"
                                 required>
 
                             <small class="text-muted">
@@ -838,7 +874,7 @@ html {
                                 <i class="bi bi-info-circle"></i>
 
                                 Formatos permitidos:
-                                JPG, JPEG, PNG y PDF.
+                                JPG, JPEG y PNG.
                                 Tamaño máximo: 5 MB.
 
                             </small>
@@ -911,6 +947,7 @@ html {
                             <input
                                 type="number"
                                 name="espesor_muro"
+                                id="espesorMuro"
                                 class="form-control"
                                 step="0.001"
                                 min="0"
@@ -919,7 +956,10 @@ html {
                                 required>
 
                             <small class="text-muted">
-                                Ejemplo: 0.15 m = 15 cm.
+                                Se completa con el ancho del ladrillo seleccionado, sin revoque.
+                                Puede modificarlo si el muro tiene otra disposición.
+                                Puede ingresar metros (0.15) o centímetros (15).
+                                Se guardará siempre en metros.
                             </small>
 
                         </div>
@@ -937,7 +977,7 @@ html {
 
                             <i class="bi bi-bricks me-2 text-primary"></i>
 
-                            Dimensiones del Ladrillo Gambote
+                            Dimensiones de ladrillo
 
                         </h6>
 
@@ -969,45 +1009,57 @@ html {
                                         -- Elegir un tipo --
                                     </option>
 
-                                    <option value="comun">
-                                        Ladrillo Común (0.24 x 0.12 x 0.09)
+                                    <option value="gambote">
+                                        Gambote / adobito (20 x 10 x 4.5 cm)
                                     </option>
 
-                                    <option value="hueco">
-                                        Ladrillo Hueco (0.30 x 0.15 x 0.10)
+                                    <option value="seis_huecos">
+                                        Ladrillo cerámico de 6 huecos (24 x 10 x 15 cm)
                                     </option>
 
-                                    <option value="refractario">
-                                        Ladrillo Refractario (0.23 x 0.11 x 0.08)
+                                    <option value="dieciocho_huecos">
+                                        Ladrillo cerámico de 18 huecos (24 x 14 x 10 cm)
                                     </option>
 
-                                    <option value="techo">
-                                        Ladrillo de Techo (0.40 x 0.20 x 0.12)
+                                    <option value="visto_18_huecos">
+                                        Ladrillo visto de 18 huecos (24 x 12 x 7 cm)
                                     </option>
 
-                                    <option value="visto">
-                                        Ladrillo Visto (0.29 x 0.14 x 0.09)
-                                    </option>
-
-                                    <option value="bloque">
-                                        Bloque de Hormigón (0.40 x 0.20 x 0.20)
-                                    </option>
-
-                                    <option value="kingkong">
-                                        Ladrillo King Kong (0.25 x 0.14 x 0.10)
-                                    </option>
-
-                                    <option value="pandereta">
-                                        Ladrillo Pandereta (0.30 x 0.15 x 0.08)
+                                    <option value="bloque_hormigon">
+                                        Bloque de hormigón (40 x 15 x 20 cm)
                                     </option>
 
                                 </select>
 
+                                <div class="row g-2 mt-2" role="group" aria-label="Seleccionar ladrillo por imagen">
+                                    @foreach ([
+                                        'gambote' => ['Gambote / adobito', 'gamboteadobito.png'],
+                                        'seis_huecos' => ['Cerámico de 6 huecos', 'ladrilloceramicoode6huecos.png'],
+                                        'dieciocho_huecos' => ['Cerámico de 18 huecos', 'ladrilloceramicode18huecos.png'],
+                                        'visto_18_huecos' => ['Visto de 18 huecos', 'ladrillovistode18huecos.png'],
+                                        'bloque_hormigon' => ['Bloque de hormigón', 'bloquedehormigon.png'],
+                                    ] as $tipo => [$nombre, $imagen])
+                                        <div class="col-6 col-md-4">
+                                            <button type="button"
+                                                class="btn btn-outline-secondary w-100 h-100 p-2 ladrillo-opcion"
+                                                data-tipo-ladrillo="{{ $tipo }}"
+                                                aria-pressed="false">
+                                                <img src="{{ asset('images/' . $imagen) }}"
+                                                    alt="{{ $nombre }}"
+                                                    class="d-block w-100 rounded mb-2 bg-white"
+                                                    style="height: 120px; object-fit: contain;"
+                                                    loading="lazy">
+                                                <span class="d-block small fw-semibold">{{ $nombre }}</span>
+                                            </button>
+                                        </div>
+                                    @endforeach
+                                </div>
+
 
                                 <small class="text-muted">
 
-                                    Seleccione un tipo y sus dimensiones
-                                    se cargarán automáticamente.
+                                    Medidas referenciales de uso habitual en Bolivia, en orden:
+                                    largo x espesor x alto. Verifique siempre la ficha del fabricante.
 
                                 </small>
 
@@ -1039,7 +1091,7 @@ html {
                             <div class="col-md-4 mb-3">
 
                                 <label class="form-label">
-                                    Ancho (m)
+                                    Espesor (m)
                                 </label>
 
                                 <input
@@ -1147,61 +1199,53 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const altoInput = document.getElementById('altoLadrillo');
 
+    const espesorMuroInput = document.getElementById('espesorMuro');
+
 
     const dimensiones = {
 
-        comun: {
+        gambote: {
+            largo: 0.20,
+            ancho: 0.10,
+            alto: 0.045
+        },
+
+        seis_huecos: {
+            largo: 0.24,
+            ancho: 0.10,
+            alto: 0.15
+        },
+
+        dieciocho_huecos: {
+            largo: 0.24,
+            ancho: 0.14,
+            alto: 0.10
+        },
+
+        visto_18_huecos: {
             largo: 0.24,
             ancho: 0.12,
-            alto: 0.09
+            alto: 0.07
         },
 
-        hueco: {
-            largo: 0.30,
+        bloque_hormigon: {
+            largo: 0.40,
             ancho: 0.15,
-            alto: 0.10
-        },
-
-        refractario: {
-            largo: 0.23,
-            ancho: 0.11,
-            alto: 0.08
-        },
-
-        techo: {
-            largo: 0.40,
-            ancho: 0.20,
-            alto: 0.12
-        },
-
-        visto: {
-            largo: 0.29,
-            ancho: 0.14,
-            alto: 0.09
-        },
-
-        bloque: {
-            largo: 0.40,
-            ancho: 0.20,
             alto: 0.20
-        },
-
-        kingkong: {
-            largo: 0.25,
-            ancho: 0.14,
-            alto: 0.10
-        },
-
-        pandereta: {
-            largo: 0.30,
-            ancho: 0.15,
-            alto: 0.08
         }
 
     };
 
 
-    function actualizarDimensiones(tipo) {
+    function actualizarDimensiones(tipo, actualizarEspesor = true) {
+
+        document.querySelectorAll('[data-tipo-ladrillo]').forEach(function (opcion) {
+            const seleccionado = opcion.dataset.tipoLadrillo === tipo;
+            opcion.classList.toggle('btn-outline-secondary', !seleccionado);
+            opcion.classList.toggle('btn-outline-primary', seleccionado);
+            opcion.classList.toggle('active', seleccionado);
+            opcion.setAttribute('aria-pressed', String(seleccionado));
+        });
 
         if (tipo && dimensiones[tipo]) {
 
@@ -1210,6 +1254,10 @@ document.addEventListener('DOMContentLoaded', function () {
             largoInput.value = dim.largo;
 
             anchoInput.value = dim.ancho;
+
+            if (espesorMuroInput && actualizarEspesor) {
+                espesorMuroInput.value = dim.ancho;
+            }
 
             altoInput.value = dim.alto;
 
@@ -1228,6 +1276,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (tipoSelect) {
 
+        document.querySelectorAll('[data-tipo-ladrillo]').forEach(function (opcion) {
+            opcion.addEventListener('click', function () {
+                tipoSelect.value = this.dataset.tipoLadrillo;
+                tipoSelect.dispatchEvent(new Event('change', { bubbles: true }));
+            });
+        });
+
         tipoSelect.addEventListener('change', function () {
 
             actualizarDimensiones(this.value);
@@ -1237,9 +1292,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Común por defecto
 
-        tipoSelect.value = 'comun';
+        tipoSelect.value = 'seis_huecos';
 
-        actualizarDimensiones('comun');
+        actualizarDimensiones('seis_huecos', !espesorMuroInput?.value);
 
     }
 
@@ -1308,50 +1363,43 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function inicializarMapa() {
 
-        if (mapa) {
-
-            mapa.invalidateSize();
-
+        if (!mapaElemento) {
             return;
+        }
+
+        if (!mapa) {
+
+            mapa = L.map('mapaProyecto', {
+                dragging: true,
+                scrollWheelZoom: true,
+                doubleClickZoom: true,
+                touchZoom: true,
+                zoomControl: false
+            }).setView(
+                [-16.5000, -64.5000],
+                5
+            );
+
+            L.tileLayer(
+                'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                {
+                    attribution:
+                        '&copy; OpenStreetMap contributors'
+                }
+            ).addTo(mapa);
+
+            mapa.addControl(
+                new ControlNavegacion()
+            );
 
         }
 
-
-        // Centro inicial en Bolivia
-
-        mapa = L.map('mapaProyecto', {
-
-    // Evita que el ratón mueva accidentalmente el mapa
-    dragging: false,
-
-    // Permite hacer zoom con la rueda
-    scrollWheelZoom: true,
-
-    // Zoom con doble clic
-    doubleClickZoom: true,
-
-    // Zoom táctil
-    touchZoom: true
-
-}).setView(
-    [-16.5000, -64.5000],
-    5
-);
-
-
-        L.tileLayer(
-            'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-            {
-                attribution:
-                    '&copy; OpenStreetMap contributors'
+        setTimeout(function () {
+            if (mapa) {
+                mapa.invalidateSize();
             }
-        ).addTo(mapa);
+        }, 200);
 
-        // Agregar el control de navegación solamente
-        // después de haber inicializado el mapa.
-        mapa.addControl(
-            new ControlNavegacion()
-        );
 
     }
     // =========================================================
@@ -1361,7 +1409,7 @@ document.addEventListener('DOMContentLoaded', function () {
 const ControlNavegacion = L.Control.extend({
 
     options: {
-        position: 'topright'
+        position: 'bottomright'
     },
 
     onAdd: function () {
@@ -1584,6 +1632,9 @@ const ControlNavegacion = L.Control.extend({
 
 
     if (modalProyecto) {
+        if (new URLSearchParams(window.location.search).get('crear') === '1') {
+            setTimeout(() => bootstrap.Modal.getOrCreateInstance(modalProyecto).show(), 0);
+        }
 
         modalProyecto.addEventListener(
             'shown.bs.modal',
@@ -1699,12 +1750,13 @@ const ControlNavegacion = L.Control.extend({
                     // GUARDAR COORDENADAS EN EL FORMULARIO
                     // =================================================
 
-                    latitudInput.value =
-                        datos.latitud;
+                    if (!latitudInput || !longitudInput) {
+                        throw new Error('No se encontraron los campos de latitud y longitud.');
+                    }
 
+                    latitudInput.value = Number(datos.latitud).toFixed(7);
 
-                    longitudInput.value =
-                        datos.longitud;
+                    longitudInput.value = Number(datos.longitud).toFixed(7);
 
 
                     // Dirección encontrada

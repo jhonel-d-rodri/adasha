@@ -1,6 +1,14 @@
 import cv2
 import json
+import os
+import re
 import sys
+from medidas_rotuladas import extraer_medidas_rotuladas
+
+try:
+    import pytesseract
+except ImportError:
+    pytesseract = None
 
 # Verificar que se reciba la ruta
 if len(sys.argv) < 2:
@@ -22,6 +30,37 @@ if imagen is None:
         "mensaje": "No se pudo abrir la imagen."
     }))
     sys.exit()
+
+# OCR es opcional: si no esta disponible, el analisis geometrico anterior
+# continua funcionando sin cambiar su resultado.
+texto_ocr = ""
+cotas_detectadas = []
+if pytesseract is not None:
+    ejecutable_ocr = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+    if os.path.isfile(ejecutable_ocr):
+        pytesseract.pytesseract.tesseract_cmd = ejecutable_ocr
+
+    gris_ocr = cv2.cvtColor(imagen, cv2.COLOR_BGR2GRAY)
+    try:
+        texto_ocr = pytesseract.image_to_string(
+            gris_ocr,
+            config="--psm 11",
+            lang="eng",
+        ).strip()
+    except (pytesseract.TesseractNotFoundError, pytesseract.TesseractError):
+        texto_ocr = ""
+
+    for valor, unidad in re.findall(
+        r"(?<!\d)(\d+(?:[.,]\d+)?)\s*(m|cm)?\b",
+        texto_ocr,
+        flags=re.IGNORECASE,
+    ):
+        numero = float(valor.replace(",", "."))
+        if 0.10 <= numero <= 100:
+            cotas_detectadas.append({
+                "valor": round(numero, 2),
+                "unidad": (unidad or "sin unidad").lower(),
+            })
 
 # Dimensiones
 alto, ancho = imagen.shape[:2]
@@ -87,20 +126,16 @@ for contorno in contornos:
     # Longitud aproximada
     longitud_pixeles += max(w, h)
 
-# Conversión provisional
-# 100 píxeles = 1 metro
-longitud_metros = longitud_pixeles / 100
-
 # Guardar imagen analizada
-ruta_salida = ruta.replace(
-    ".",
-    "_analizado."
-)
+ruta_salida = os.path.splitext(ruta)[0] + "_analizado.png"
 
 cv2.imwrite(
     ruta_salida,
     imagen
 )
+
+# Las sugerencias proceden del rótulo, no de una medición geométrica.
+medidas_sugeridas = extraer_medidas_rotuladas(texto_ocr)
 
 # Crear JSON
 resultado = {
@@ -109,9 +144,16 @@ resultado = {
     "alto": alto,
     "muros": cantidad_muros,
     "longitud_pixeles": round(longitud_pixeles, 2),
-    "longitud_total": round(longitud_metros, 2),
+    "longitud_total": None,
+    "medidas_sugeridas": medidas_sugeridas,
     "imagen_analizada": ruta_salida,
-    "mensaje": "Plano analizado correctamente."
+    "texto_ocr": texto_ocr,
+    "cotas_detectadas": cotas_detectadas,
+    "mensaje": (
+        "Se leyó la longitud por planta indicada en el plano. Revise el dato propuesto antes de calcular."
+        if medidas_sugeridas else
+        "No se pudo leer una longitud por planta explícita. Se requiere una medida verificada para calcular."
+    )
 }
 
 # Enviar JSON a Laravel

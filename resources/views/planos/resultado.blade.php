@@ -16,7 +16,7 @@
             <div>
                 <a href="{{ route('planos.calcular-materiales', $plano->id) }}" class="btn btn-warning btn-sm">
                     <i class="bi bi-calculator-fill"></i>
-                    Calcular materiales
+                    Configurar y calcular materiales
                 </a>
 
                 <a href="{{ route('planos.index') }}" class="btn btn-light btn-sm">
@@ -90,10 +90,19 @@
                 <div class="col-md-3">
                     <div class="card border-info shadow-sm mb-3">
                         <div class="card-body text-center">
-                            <h6 class="text-muted">Longitud total</h6>
+                            <h6 class="text-muted">Longitud por planta</h6>
                             <h4 class="text-info">
-                                {{ number_format($resultado['longitud_total'] ?? 0, 2) }} m
+                                @if($plano->medidasSugeridas())
+                                    {{ number_format($plano->medidasSugeridas()['longitud_por_planta'], 2, ',', '.') }} m
+                                @else
+                                    No determinada
+                                @endif
                             </h4>
+                            @if($plano->medidasSugeridas())
+                                <small>Leída del rótulo del plano. Revise antes de calcular.</small>
+                            @else
+                                <small>Se requiere una medida verificada.</small>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -119,6 +128,20 @@
                 {{ $resultado['mensaje'] ?? 'Análisis completado correctamente.' }}
             </div>
 
+            @if(!empty($resultado['cotas_detectadas']))
+                <div class="alert alert-secondary">
+                    <strong><i class="bi bi-rulers"></i> Cotas leídas por OCR:</strong>
+                    @foreach($resultado['cotas_detectadas'] as $cota)
+                        <span class="badge bg-dark ms-1">
+                            {{ number_format($cota['valor'], 2, ',', '.') }} {{ $cota['unidad'] === 'sin unidad' ? '' : $cota['unidad'] }}
+                        </span>
+                    @endforeach
+                    <div class="small mt-2">
+                        Estas cotas son una lectura automática. Confirme la longitud total de muros antes de calcular.
+                    </div>
+                </div>
+            @endif
+
             {{-- Longitud guardada en el plano --}}
             @if($plano->longitud_total && $plano->longitud_total > 0)
                 <div class="alert alert-success">
@@ -138,7 +161,7 @@
                         <i class="bi bi-image-fill"></i>
                         Plano analizado
                     </h5>
-                    <img src="data:image/png;base64,{{ $resultado['imagen_analizada'] }}" 
+                    <img src="{{ route('planos.archivo', ['plano' => $plano, 'analizado' => 1]) }}" 
                          alt="Plano analizado" 
                          class="img-fluid border rounded"
                          style="max-height: 500px;">

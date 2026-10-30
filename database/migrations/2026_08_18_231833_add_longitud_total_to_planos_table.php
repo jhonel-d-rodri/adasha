@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('planos', function (Blueprint $table) {
-            $table->decimal('longitud_total', 10, 2)->nullable()->after('nombre');
+            $table->decimal('longitud_total', 10, 2)->nullable()->after('nombre_archivo');
         });
     }
 

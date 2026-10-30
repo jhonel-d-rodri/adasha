@@ -56,7 +56,7 @@
                         @forelse($calculos as $index => $calculo)
                             <tr>
                                 <td>{{ $index + 1 }}</td>
-                                <td>{{ $calculo->material->nombre ?? 'N/A' }}</td>
+                                <td class="material-name">{{ $calculo->material->nombre ?? 'N/A' }}</td>
                                 <td>
                                     @if(str_contains($calculo->material->nombre ?? '', 'Ladrillo') || str_contains($calculo->material->nombre ?? '', 'Cemento'))
                                         {{ number_format($calculo->cantidad, 0, ',', '.') }}
@@ -81,3 +81,4 @@
     </div>
 </div>
 @endsection
+

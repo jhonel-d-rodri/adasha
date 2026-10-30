@@ -257,7 +257,7 @@
 
                                     {{-- VER ARCHIVO --}}
                                     <a
-                                        href="{{ Storage::url($plano->ruta_archivo) }}"
+                                        href="{{ route('planos.archivo', $plano) }}"
                                         target="_blank"
                                         class="btn btn-info btn-sm"
                                     >
@@ -290,7 +290,7 @@
 
 
                                         {{-- CALCULAR MATERIALES --}}
-                                        @if($plano->estaAnalizado())
+                                        @if($plano->procesado)
 
                                             <a
                                                 href="{{ route('planos.calcular-materiales', $plano->id) }}"

@@ -17,7 +17,11 @@ class GoogleAuthController extends Controller
 
     public function callback()
     {
-        $googleUser = Socialite::driver('google')->stateless()->user();
+        try {
+            $googleUser = Socialite::driver('google')->user();
+        } catch (\Laravel\Socialite\Two\InvalidStateException $e) {
+            return redirect()->route('login')->with('error', 'La solicitud de acceso expiró. Intente iniciar sesión nuevamente.');
+        }
 
         $user = User::where('google_id', $googleUser->id)->first();
 
@@ -30,14 +34,14 @@ class GoogleAuthController extends Controller
                 'name' => $googleUser->name,
                 'email' => $googleUser->email,
                 'google_id' => $googleUser->id,
+                'avatar' => $googleUser->getAvatar(),
                 'role' => 'usuario',
                 'password' => Hash::make(Str::random(32)),
             ]);
         } else {
-            if (!$user->google_id) {
-                $user->google_id = $googleUser->id;
-                $user->save();
-            }
+            $user->google_id ??= $googleUser->id;
+            $user->avatar = $googleUser->getAvatar();
+            $user->save();
         }
 
         Auth::login($user);

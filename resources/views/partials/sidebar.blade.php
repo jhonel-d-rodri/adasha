@@ -1,14 +1,18 @@
-<aside class="sidebar">
-    <div class="logo">
-        <i class="bi bi-building-fill"></i>
-        <h3>CONSTRUCTORA<br>ADASHA</h3>
-    </div>
+<aside class="sidebar" id="main-sidebar" aria-label="Menú principal">
+    <a class="logo sidebar-brand" href="{{ route('dashboard') }}" aria-label="Constructora ADASHA — Ir al panel principal">
+        <span class="sidebar-brand-frame">
+            <img class="sidebar-brand-image"
+                 src="{{ asset('images/logo-empresa-adasha.png') }}"
+                 alt="Constructora ADASHA"
+                 width="2172" height="724">
+        </span>
+    </a>
 
-```
+<div class="sidebar-section-label">ESPACIO DE TRABAJO</div>
 <ul>
 
     {{-- DASHBOARD --}}
-    <li>
+    <li class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
         <a href="{{ route('dashboard') }}">
             <i class="bi bi-speedometer2"></i>
             Dashboard
@@ -16,7 +20,7 @@
     </li>
 
     {{-- PROYECTOS --}}
-    <li>
+    <li class="{{ request()->routeIs('proyectos.index', 'proyectos.create', 'proyectos.edit', 'proyectos.show') ? 'active' : '' }}">
         <a href="{{ route('proyectos.index') }}">
             <i class="bi bi-folder-fill"></i>
             Proyectos
@@ -24,7 +28,7 @@
     </li>
 
     {{-- CÁLCULO DE MATERIALES --}}
-    <li>
+    <li class="{{ request()->routeIs('planos.*', 'calculos.*') ? 'active' : '' }}">
         <a href="{{ route('planos.index') }}">
             <i class="bi bi-box-seam-fill"></i>
             Cálculo de Materiales
@@ -32,13 +36,21 @@
     </li>
 
     {{-- REPORTES --}}
-    <li>
+    <li class="{{ request()->routeIs('reportes.*') ? 'active' : '' }}">
         <a href="{{ route('reportes.index') }}">
             <i class="bi bi-file-earmark-pdf-fill"></i>
             Reportes
         </a>
     </li>
 
+
+    {{-- HISTORIAL DE CLIENTES --}}
+    <li class="{{ request()->routeIs('proyectos.historial') ? 'active' : '' }}">
+        <a href="{{ route('proyectos.historial') }}">
+            <i class="bi bi-person-lines-fill"></i>
+            Historial de Clientes
+        </a>
+    </li>
 
     {{-- ================================================= --}}
     {{-- OPCIONES EXCLUSIVAS DEL ADMINISTRADOR --}}
@@ -47,18 +59,10 @@
     @if(auth()->user()->isAdministrador())
 
         {{-- GESTIÓN DE USUARIOS --}}
-        <li>
+        <li class="{{ request()->routeIs('usuarios.*') ? 'active' : '' }}">
             <a href="{{ route('usuarios.index') }}">
                 <i class="bi bi-people-fill"></i>
                 Gestión de Usuarios
-            </a>
-        </li>
-
-        {{-- HISTORIAL DE CLIENTES --}}
-        <li>
-            <a href="{{ route('proyectos.index') }}">
-                <i class="bi bi-person-lines-fill"></i>
-                Historial de Clientes
             </a>
         </li>
 
@@ -78,6 +82,5 @@
     </li>
 
 </ul>
-```
 
 </aside>

@@ -119,13 +119,17 @@
                     <div class="col-md-6 mb-3">
 
                         <label class="form-label fw-bold">
-                            Nueva contraseña
+                            Asignar nueva contraseña
                         </label>
 
                         <input type="password"
                                name="password"
                                class="form-control"
-                               placeholder="Dejar vacío para conservar la actual">
+                               placeholder="Mínimo 8 caracteres; vacío para conservar">
+
+                        <small class="text-muted d-block mt-1">
+                            Para usuarios de Google, asigne una contraseña aquí si también necesitan ingresar con correo y contraseña.
+                        </small>
 
                     </div>
 
@@ -133,7 +137,7 @@
                     <div class="col-md-6 mb-4">
 
                         <label class="form-label fw-bold">
-                            Confirmar nueva contraseña
+                            Confirmar la nueva contraseña
                         </label>
 
                         <input type="password"

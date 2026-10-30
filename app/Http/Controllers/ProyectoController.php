@@ -72,13 +72,30 @@ class ProyectoController extends Controller
         return view('proyectos.index', compact('proyectos'));
     }
 
+    public function historialClientes()
+    {
+        $usuario = auth()->user();
+
+        $query = Proyecto::with(['usuario'])
+            ->select(['*'])
+            ->orderBy('created_at', 'desc');
+
+        if ($usuario->role !== 'admin') {
+            $query->where('user_id', $usuario->id);
+        }
+
+        $historial = $query->get();
+
+        return view('proyectos.historial-clientes', compact('historial'));
+    }
+
 
     /**
      * Mostrar formulario para crear proyecto.
      */
     public function create()
     {
-        return view('proyectos.create');
+        return redirect()->route('proyectos.index', ['crear' => 1]);
     }
 
 
@@ -226,8 +243,8 @@ class ProyectoController extends Controller
             'fecha_inicio' =>
                 'required|date',
 
-            'estado' =>
-                'required|string|in:Activo,En_proceso,Finalizado',
+            'fecha_finalizacion' =>
+                'nullable|date|after_or_equal:fecha_inicio',
 
             'descripcion' =>
                 'nullable|string',
@@ -236,7 +253,7 @@ class ProyectoController extends Controller
                 'required|numeric|min:0.01',
 
             'espesor_muro' =>
-                'required|numeric|min:0.001',
+                'required|numeric|min:0.001|max:100',
 
             'ladrillo_largo' =>
                 'required|numeric|min:0.001',
@@ -251,27 +268,21 @@ class ProyectoController extends Controller
                 'required|string|max:255',
 
             'archivo' =>
-                'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
+                'nullable|file|mimes:jpg,jpeg,png|max:5120',
         ]);
 
 
-        // Convertir estado
-        $estadoMap = [
+        $estadoBD = Proyecto::calcularEstadoDesdeFechas(
+            $request->fecha_inicio,
+            $request->fecha_finalizacion
+        );
 
-            'Activo' =>
-                'registrado',
-
-            'En_proceso' =>
-                'en_proceso',
-
-            'Finalizado' =>
-                'finalizado',
-        ];
-
-
-        $estadoBD =
-            $estadoMap[$request->estado]
-            ?? 'registrado';
+        // El formulario admite metros (0.15) o centímetros (15).
+        // La base de datos siempre conserva la medida en metros.
+        $espesorMuro = (float) $request->espesor_muro;
+        if ($espesorMuro > 1) {
+            $espesorMuro /= 100;
+        }
 
 
         // Usuario actualmente autenticado
@@ -315,6 +326,9 @@ class ProyectoController extends Controller
             'fecha_inicio' =>
                 $request->fecha_inicio,
 
+            'fecha_finalizacion' =>
+                $request->fecha_finalizacion,
+
             'estado' =>
                 $estadoBD,
 
@@ -325,7 +339,7 @@ class ProyectoController extends Controller
                 $request->altura_muro,
 
             'espesor_muro' =>
-                $request->espesor_muro,
+                $espesorMuro,
 
             'largo_ladrillo' =>
                 $request->ladrillo_largo,
@@ -355,7 +369,7 @@ class ProyectoController extends Controller
                 $request->file('archivo');
 
             $nombreArchivo =
-                time() .
+                \Illuminate\Support\Str::uuid()->toString() .
                 '_' .
                 $archivo->getClientOriginalName();
 
@@ -363,7 +377,7 @@ class ProyectoController extends Controller
                 $archivo->storeAs(
                     'planos',
                     $nombreArchivo,
-                    'public'
+                    'planos'
                 );
 
             Plano::create([
@@ -482,8 +496,8 @@ class ProyectoController extends Controller
             'fecha_inicio' =>
                 'required|date',
 
-            'estado' =>
-                'required|string|in:Activo,En_proceso,Finalizado',
+            'fecha_finalizacion' =>
+                'nullable|date|after_or_equal:fecha_inicio',
 
             'descripcion' =>
                 'nullable|string',
@@ -492,7 +506,7 @@ class ProyectoController extends Controller
                 'required|numeric|min:0.01',
 
             'espesor_muro' =>
-                'required|numeric|min:0.001',
+                'required|numeric|min:0.001|max:100',
 
             'ladrillo_largo' =>
                 'required|numeric|min:0.001',
@@ -504,27 +518,21 @@ class ProyectoController extends Controller
                 'required|numeric|min:0.001',
 
             'archivo' =>
-                'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
+                'nullable|file|mimes:jpg,jpeg,png|max:5120',
         ]);
 
 
-        // Convertir estado
-        $estadoMap = [
+        $estadoBD = Proyecto::calcularEstadoDesdeFechas(
+            $request->fecha_inicio,
+            $request->fecha_finalizacion
+        );
 
-            'Activo' =>
-                'registrado',
-
-            'En_proceso' =>
-                'en_proceso',
-
-            'Finalizado' =>
-                'finalizado',
-        ];
-
-
-        $estadoBD =
-            $estadoMap[$request->estado]
-            ?? 'registrado';
+        // El formulario admite metros (0.15) o centímetros (15).
+        // La base de datos siempre conserva la medida en metros.
+        $espesorMuro = (float) $request->espesor_muro;
+        if ($espesorMuro > 1) {
+            $espesorMuro /= 100;
+        }
 
 
         /*
@@ -557,6 +565,9 @@ class ProyectoController extends Controller
             'fecha_inicio' =>
                 $request->fecha_inicio,
 
+            'fecha_finalizacion' =>
+                $request->fecha_finalizacion,
+
             'estado' =>
                 $estadoBD,
 
@@ -567,7 +578,7 @@ class ProyectoController extends Controller
                 $request->altura_muro,
 
             'espesor_muro' =>
-                $request->espesor_muro,
+                $espesorMuro,
 
             'largo_ladrillo' =>
                 $request->ladrillo_largo,
@@ -596,12 +607,12 @@ class ProyectoController extends Controller
 
                 if (
                     $planoAnterior->ruta_archivo &&
-                    Storage::disk('public')->exists(
+                    Storage::disk('planos')->exists(
                         $planoAnterior->ruta_archivo
                     )
                 ) {
 
-                    Storage::disk('public')->delete(
+                    Storage::disk('planos')->delete(
                         $planoAnterior->ruta_archivo
                     );
                 }
@@ -614,7 +625,7 @@ class ProyectoController extends Controller
                 $request->file('archivo');
 
             $nombreArchivo =
-                time() .
+                \Illuminate\Support\Str::uuid()->toString() .
                 '_' .
                 $archivo->getClientOriginalName();
 
@@ -622,7 +633,7 @@ class ProyectoController extends Controller
                 $archivo->storeAs(
                     'planos',
                     $nombreArchivo,
-                    'public'
+                    'planos'
                 );
 
 
@@ -698,12 +709,12 @@ class ProyectoController extends Controller
 
             if (
                 $plano->ruta_archivo &&
-                Storage::disk('public')->exists(
+                Storage::disk('planos')->exists(
                     $plano->ruta_archivo
                 )
             ) {
 
-                Storage::disk('public')->delete(
+                Storage::disk('planos')->delete(
                     $plano->ruta_archivo
                 );
             }

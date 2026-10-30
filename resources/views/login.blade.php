@@ -1,4 +1,3 @@
-```php
 <!DOCTYPE html>
 <html lang="es">
 
@@ -16,28 +15,46 @@
         href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <!-- CSS -->
-    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/style.css') }}?v={{ filemtime(public_path('css/style.css')) }}">
 </head>
 
-<body>
+<body class="login-page">
 
 <div class="container-fluid">
+
+    <div class="login-illustration" aria-hidden="true">
+        <img src="{{ asset('images/login-construccion-adasha.png') }}" alt="">
+    </div>
 
     <div class="row vh-100">
 
         <!-- LADO IZQUIERDO -->
         <div class="col-lg-7 left d-flex align-items-center justify-content-center">
 
-            <div class="text-center px-5">
+            <div class="content">
 
-                <h1>CONSTRUCTORA</h1>
+                <div class="login-eyebrow">
+                    <i class="bi bi-shield-check"></i>
+                    Sistema integral de construcción
+                </div>
 
-                <h2>ADASHA</h2>
+                <h1>Gestión de obra<br><span>con mayor precisión.</span></h1>
 
                 <p>
-                    Sistema Web para el Cálculo Automatizado de Materiales
-                    de Construcción mediante análisis de planos arquitectónicos.
+                    Centraliza tus proyectos, analiza planos y calcula materiales
+                    con información clara para tomar mejores decisiones.
                 </p>
+
+                <div class="features text-start">
+                    <div class="feature-item">
+                        <i class="bi bi-diagram-3-fill"></i>
+                        <span><strong>Proyectos organizados</strong>Planos y avances siempre disponibles</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="bi bi-calculator-fill"></i>
+                        <span><strong>Cálculos precisos</strong>Materiales estimados con mayor control</span>
+                    </div>
+                </div>
 
             </div>
 
@@ -47,24 +64,18 @@
         <!-- LADO DERECHO -->
         <div class="col-lg-5 right d-flex align-items-center justify-content-center">
 
-            <div class="card login-card shadow">
+            <div class="card login-card shadow" aria-labelledby="login-title">
 
                 <!-- ENCABEZADO -->
-                <div class="text-center mb-4">
+                <div class="card-header">
 
-                    <img
-                        src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
-                        width="90"
-                        height="90"
-                        alt="Usuario">
-
-                    <h3 class="mt-3">
-                        Bienvenido
-                    </h3>
-
-                    <p class="text-muted">
-                        Inicie sesión para continuar
-                    </p>
+                    <img class="login-company-logo"
+                         src="{{ asset('images/logo-empresa-adasha.png') }}"
+                         alt="Constructora ADASHA"
+                         width="2172" height="724">
+                    <span class="login-card-kicker">Portal administrativo</span>
+                    <h3 id="login-title">Acceso al sistema</h3>
+                    <p>Ingresa tus credenciales para continuar</p>
 
                 </div>
 
@@ -135,7 +146,7 @@
                     @csrf
 
                     <!-- CORREO -->
-                    <div class="mb-3">
+                    <div class="form-group">
 
                         <label for="email" class="form-label">
                             Correo electrónico
@@ -163,7 +174,7 @@
 
 
                     <!-- CONTRASEÑA -->
-                    <div class="mb-4">
+                    <div class="form-group">
 
                         <label for="password" class="form-label">
                             Contraseña
@@ -183,12 +194,27 @@
                                 placeholder="Ingrese su contraseña"
                                 required>
 
+                            <button
+                                type="button"
+                                class="password-toggle"
+                                aria-label="Mostrar contraseña"
+                                aria-controls="password"
+                                aria-pressed="false">
+                                <i class="bi bi-eye"></i>
+                            </button>
+
                         </div>
 
                     </div>
 
 
                     <!-- BOTÓN INGRESAR -->
+                    <div class="form-options">
+                        <span class="secure-access"><i class="bi bi-shield-lock"></i> Acceso seguro</span>
+                        <a class="small fw-semibold text-decoration-none" href="{{ route('password.request') }}">
+                            Recuperar contraseña
+                        </a>
+                    </div>
                     <div class="d-grid">
 
                         <button
@@ -197,7 +223,7 @@
 
                             <i class="bi bi-box-arrow-in-right me-2"></i>
 
-                            Ingresar
+                            Iniciar sesión
 
                         </button>
 
@@ -207,15 +233,9 @@
 
 
                 <!-- SEPARADOR -->
-                <div class="d-flex align-items-center my-4">
+                <div class="divider" aria-hidden="true">
 
-                    <hr class="flex-grow-1">
-
-                    <span class="mx-3 text-muted">
-                        O
-                    </span>
-
-                    <hr class="flex-grow-1">
+                    <span>O</span>
 
                 </div>
 
@@ -225,7 +245,7 @@
 
                     <a
                         href="{{ route('google.login') }}"
-                        class="btn btn-outline-dark btn-lg">
+                        class="btn-google">
 
                         <i class="bi bi-google me-2"></i>
 
@@ -234,6 +254,8 @@
                     </a>
 
                 </div>
+
+                <p class="login-support"><i class="bi bi-headset"></i> Soporte de acceso: contacta al administrador</p>
 
 
             </div>
@@ -248,7 +270,19 @@
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
+<script>
+    const passwordInput = document.getElementById('password');
+    const passwordToggle = document.querySelector('.password-toggle');
+
+    passwordToggle?.addEventListener('click', () => {
+        const visible = passwordInput.type === 'text';
+        passwordInput.type = visible ? 'password' : 'text';
+        passwordToggle.setAttribute('aria-pressed', String(!visible));
+        passwordToggle.setAttribute('aria-label', visible ? 'Mostrar contraseña' : 'Ocultar contraseña');
+        passwordToggle.innerHTML = `<i class="bi bi-eye${visible ? '' : '-slash'}"></i>`;
+    });
+</script>
+
 </body>
 
 </html>
-```

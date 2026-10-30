@@ -16,11 +16,24 @@ class Plano extends Model
         'procesado',
         'datos_extraidos',
         'longitud_total',
+        'plantas',
+        'tipo_cubierta',
+        'cimentacion',
+        'columnas',
+        'vigas',
+        'superficie_construida',
+        'area_vanos',
     ];
 
     protected $casts = [
         'procesado' => 'boolean',
         'longitud_total' => 'float',
+        'plantas' => 'integer',
+        'cimentacion' => 'boolean',
+        'columnas' => 'boolean',
+        'vigas' => 'boolean',
+        'superficie_construida' => 'float',
+        'area_vanos' => 'float',
     ];
 
     /**
@@ -57,5 +70,20 @@ class Plano extends Model
     {
         return $this->longitud_total !== null
             && $this->longitud_total > 0;
+    }
+
+    public function medidasSugeridas(): array
+    {
+        $datos = is_array($this->datos_extraidos)
+            ? $this->datos_extraidos
+            : json_decode($this->datos_extraidos ?? '{}', true);
+        $medidas = $datos['medidas_sugeridas'] ?? [];
+        if (!is_array($medidas) || ($medidas['origen'] ?? null) !== 'rotulo_ocr'
+            || !is_numeric($medidas['longitud_por_planta'] ?? null)
+            || $medidas['longitud_por_planta'] <= 0) {
+            return [];
+        }
+
+        return $medidas;
     }
 }
