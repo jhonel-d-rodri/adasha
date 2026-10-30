@@ -1,7 +1,7 @@
 FROM php:8.3-apache
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    git unzip libicu-dev libzip-dev libpng-dev libjpeg62-turbo-dev libfreetype6-dev libpq-dev \
+    git unzip libicu-dev libzip-dev libpng-dev libjpeg62-turbo-dev libfreetype6-dev libpq-dev libsqlite3-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j"$(nproc)" pdo_sqlite pdo_pgsql intl zip gd bcmath opcache \
     && a2enmod rewrite headers \
