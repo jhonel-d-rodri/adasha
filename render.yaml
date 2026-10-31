@@ -19,9 +19,11 @@ services:
       - key: LOG_CHANNEL
         value: stderr
       - key: DB_CONNECTION
-        value: sqlite
-      - key: DB_DATABASE
-        value: /tmp/adasha.sqlite
+        value: pgsql
+      - key: DB_URL
+        fromDatabase:
+          name: adasha-db
+          property: connectionString
       - key: SESSION_DRIVER
         value: file
       - key: CACHE_STORE
@@ -30,3 +32,10 @@ services:
         value: sync
       - key: FILESYSTEM_DISK
         value: local
+
+databases:
+  - name: adasha-db
+    region: oregon
+    plan: free
+    databaseName: adasha
+    user: adasha
