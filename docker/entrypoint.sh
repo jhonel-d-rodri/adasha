@@ -12,6 +12,7 @@ fi
 
 php artisan migrate --force
 php artisan config:cache
+php artisan db:seed --class=InitialAdminSeeder --force
 php artisan route:cache
 php artisan view:cache
 
